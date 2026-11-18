@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/native_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingTop="6dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="6dp">
+
+    <LinearLayout
+        android:id="@+id/native_title_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/native_greeting_row"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/native_greeting_shadow"
+                style="@style/QuickSpaceNativeTextShadow"
+                android:ellipsize="end"
+                android:gravity="center_horizontal"
+                android:singleLine="true"
+                android:textColor="#A8D8FF"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/native_greeting_plain"
+                style="@style/QuickSpaceNativeTextPlain"
+                android:ellipsize="end"
+                android:gravity="center_horizontal"
+                android:singleLine="true"
+                android:textColor="#A8D8FF"
+                android:textSize="18sp"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/native_date_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/native_clock_ext_shadow"
+                style="@style/QuickSpaceNativeTextShadow"
+                android:layout_marginEnd="6dp"
+                android:singleLine="true"
+                android:textColor="#A8D8FF"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/native_clock_ext_plain"
+                style="@style/QuickSpaceNativeTextPlain"
+                android:layout_marginEnd="6dp"
+                android:singleLine="true"
+                android:textColor="#A8D8FF"
+                android:textSize="16sp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/native_title_shadow"
+                style="@style/QuickSpaceNativeTextShadow"
+                android:ellipsize="end"
+                android:gravity="center_horizontal"
+                android:singleLine="true"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/native_title_plain"
+                style="@style/QuickSpaceNativeTextPlain"
+                android:ellipsize="end"
+                android:gravity="center_horizontal"
+                android:singleLine="true"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/native_subtitle_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="0dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/native_subtitle_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="6dp"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_quickspace_crdroid"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/native_subtitle_shadow"
+            style="@style/QuickSpaceNativeTextShadow"
+            android:ellipsize="end"
+            android:gravity="center_horizontal"
+            android:letterSpacing="0.01"
+            android:maxLines="2"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/native_subtitle_plain"
+            style="@style/QuickSpaceNativeTextPlain"
+            android:ellipsize="end"
+            android:gravity="center_horizontal"
+            android:letterSpacing="0.01"
+            android:maxLines="2"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

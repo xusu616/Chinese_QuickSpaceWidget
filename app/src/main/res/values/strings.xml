@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QuickSpace</string>
+    <string name="widget_name">QuickSpace (crDroid)</string>
+    <string name="widget_description">crDroid QuickSpace style date, greetings, and daily quotes widget</string>
+
+    <string name="preview_date_sample">Wed, Nov 18</string>
+    <string name="preview_quote_sample">Sunrise or not, your potential is always on the rise.</string>
+
+    <!-- crDroid QuickSpace Core Strings (Apache-2.0) -->
+    <string name="quickspace_date_format" translatable="false">EEE, MMM d</string>
+    <string name="quickspace_date_format_minimalistic" translatable="false">EEEE, MMMM d</string>
+
+    <string name="quickspace_grt_morning">Good morning.</string>
+    <string name="quickspace_grt_evening">Good evening.</string>
+    <string name="quickspace_grt_afternoon">Good afternoon.</string>
+    <string name="quickspace_grt_night">Good night.</string>
+    <string name="quickspace_grt_general">Good day.</string>
+    <string name="quickspace_ext_one">Today is</string>
+    <string name="quickspace_ext_two">It\'s</string>
+
+    <string-array name="quickspace_psa_morning">
+        <item>Good morning!</item>
+        <item>Good morning, time to rock!</item>
+        <item>What a beautiful day!</item>
+        <item>Have a nice day!</item>
+        <item>What about a small 5 minutes nap?</item>
+        <item>Let\'s get this bread.</item>
+        <item>Mornings are a fresh canvas for your daily masterpiece.</item>
+        <item>Embrace the sunrise of opportunity each morning.</item>
+        <item>In the early light, find the power to illuminate your path.</item>
+        <item>Your day begins with endless possibilities.</item>
+        <item>Every sunrise is a reminder that you can start anew.</item>
+        <item>Awake with purpose, conquer the day ahead.</item>
+        <item>Your thoughts can be the foundation of great achievements.</item>
+        <item>The world awakens, and so does your potential.</item>
+        <item>The first chapter in your daily adventure.</item>
+        <item>Let your morning routine be the launchpad for success.</item>
+        <item>Sunrise or not, your potential is always on the rise.</item>
+        <item>It\'s time for fresh ideas and bold actions.</item>
+        <item>The early bird catches the worm, but you can catch your dreams.</item>
+        <item>Find the courage to chase your aspirations.</item>
+        <item>Rise and shine, for greatness awaits.</item>
+        <item>The best time to start is now.</item>
+    </string-array>
+
+    <string-array name="quickspace_psa_noon">
+        <item>Chase your dreams, not the minutes.</item>
+        <item>In every moment, a new opportunity.</item>
+        <item>Embrace the journey, not just the destination.</item>
+        <item>Today is a gift, that\'s why it\'s called the present.</item>
+        <item>Let your smile change the world.</item>
+        <item>Life is a story; make each chapter count.</item>
+        <item>Find joy in the ordinary moments.</item>
+        <item>The best is yet to come, keep it up.</item>
+        <item>Your chance to turn \'what if\' into \'what is.\'</item>
+        <item>Seize the day, starting right now.</item>
+        <item>Happiness is a choice you can make any time.</item>
+        <item>Believe in yourself, even on a sleepy afternoon.</item>
+        <item>Let your actions speak louder than the clock.</item>
+        <item>Your life is what you make of it; make it amazing.</item>
+        <item>Dream big, work hard, and never give up.</item>
+        <item>You are stronger than you think.</item>
+        <item>Every setback is a setup for a comeback.</item>
+        <item>Embrace the journey, not just the destination.</item>
+        <item>Chase your goals, not your fears.</item>
+        <item>Your potential is endless; unlock it.</item>
+    </string-array>
+
+    <string-array name="quickspace_psa_early_evening">
+        <item>Embrace the present moment, no matter the hour.</item>
+        <item>In every dusk, find a new dawn of opportunity.</item>
+        <item>Life is a journey; enjoy the scenery along the way.</item>
+        <item>Your attitude shapes your reality.</item>
+        <item>Your story is still being written, even as the sun sets.</item>
+        <item>Capture the beauty in the ordinary moments.</item>
+        <item>It\'s time to reflect and reset.</item>
+        <item>Choose joy, no matter the time on the clock.</item>
+        <item>Opportunities don\'t clock out in the evening.</item>
+        <item>Be the reason someone smiles.</item>
+        <item>Your potential knows no bounds.</item>
+        <item>Moments of magic can happen at any hour.</item>
+        <item>Your life is what you make of it; make it extraordinary.</item>
+        <item>Stay curious, stay grateful.</item>
+        <item>Be the change you wish to see in the world.</item>
+        <item>Believe in yourself; you are capable of amazing things.</item>
+        <item>The only limit is the one you set for yourself.</item>
+        <item>Success begins with a single step.</item>
+    </string-array>
+
+    <string-array name="quickspace_psa_evening">
+        <item>Seize the night, for it holds its own mysteries.</item>
+        <item>In the quiet of this evening, find serenity.</item>
+        <item>Life\'s greatest adventures can start in the darkness.</item>
+        <item>Your journey continues even after the sun has set.</item>
+        <item>Let the night be your canvas; paint it with dreams.</item>
+        <item>In the stillness of this evening, find your inner peace.</item>
+        <item>Stars shine brightest in the darkest hours.</item>
+        <item>Dream big, even in the late hours of the day.</item>
+        <item>Your life is a story waiting to be written.</item>
+        <item>It\'s time for reflection and renewal.</item>
+        <item>Late night thoughts can lead to early morning revelations.</item>
+        <item>Find joy in the stillness of this evening.</item>
+        <item>The night sky is a vast canvas of dreams.</item>
+        <item>Your potential knows no bedtime; pursue your passions.</item>
+        <item>Stay hopeful, even in the darkest hours.</item>
+        <item>In the midst of chaos, find your inner calm.</item>
+        <item>Stay positive, work hard, make it happen.</item>
+    </string-array>
+
+    <string-array name="quickspace_psa_midnight">
+        <item>Nights are the quiet whispers of opportunity.</item>
+        <item>In the stillness of the night, find your inner strength.</item>
+        <item>Embrace the darkness, for it holds the keys to your dreams.</item>
+        <item>The world sleeps, but your potential is wide awake.</item>
+        <item>The night may be late, but your ambitions are timeless.</item>
+        <item>Stay curious, stay awake, and let nights guide you.</item>
+        <item>Find the courage to chase your dreams.</item>
+        <item>Great things never come from comfort zones.</item>
+        <item>You have the power to create your own destiny.</item>
+        <item>Happiness is a choice; choose it every day.</item>
+        <item>Life is what you make it, so make it count.</item>
+        <item>Stay focused, stay determined, stay unstoppable.</item>
+        <item>You are the author of your own story.</item>
+        <item>Strive for progress, not perfection.</item>
+        <item>Every day is a new beginning; make it a great one.</item>
+        <item>Inspire others by being your authentic self.</item>
+        <item>Your attitude determines your direction.</item>
+    </string-array>
+
+    <string-array name="quickspace_psa_random">
+        <item>Ignorance is Bliss</item>
+        <item>Is it time to flash another update already?</item>
+        <item>Make peace, not war</item>
+        <item>Oh hey, what\'s up?</item>
+        <item>Welcome to real Matrix!</item>
+        <item>How many screenshots do you take?</item>
+        <item>Open goodness with crDroid</item>
+        <item>Spread love, not havoc</item>
+        <item>We didn\'t start the fire!</item>
+        <item>Time for some good music</item>
+        <item>\u003C\u003C\u003C\u003C\u003C\u003C\u003C HEAD</item>
+        <item>You need crDroid Premium to see this</item>
+        <item>Remember the Lineage of the Unicorn</item>
+        <item>Enjoy Xtended battery life</item>
+        <item>Starting from the ground zero</item>
+        <item>We love you 3000</item>
+        <item>Delicious even without Sushi</item>
+        <item>Do something nice today</item>
+        <item>This is best Pixel Experience, isn\'t it?</item>
+        <item>No illusions, welcome to reality!</item>
+        <item>Thank you for your support</item>
+        <item>No festival for Derps - only perfection!</item>
+        <item>One of the buildbot\'s best picks</item>
+        <item>Sanity for your Paranoia</item>
+        <item>Rising in peace</item>
+        <item>What a lovely experience, isn\'t it?</item>
+        <item>Evolution is a myth, right?</item>
+        <item>You are what you flash, don\'t be Potato</item>
+        <item>What\'s on your mind?</item>
+        <item>Expecto Patronum</item>
+        <item>Wubba Lubba Dub Dub</item>
+        <item>Winner Winner ....?</item>
+        <item>rm -rf /</item>
+        <item>Pringles aren\'t actually potato chips..</item>
+        <item>Remember to check device\'s battery level!</item>
+        <item>Check your email/messages.</item>
+        <item>Check your to-do list if you have one.</item>
+        <item>You can disable quickspace via home settings.</item>
+        <item>Loving us? Send us a beer</item>
+        <item>Best Rom Ever.</item>
+        <item>Say hi to us on Telegram</item>
+        <item>Could AI wipe humanity?</item>
+    </string-array>
+
+    <!-- M3 App UI Strings -->
+    <string name="app_subtitle">crDroid QuickSpace Standalone Widget</string>
+    <string name="action_add_widget">Add to Home</string>
+    <string name="action_next_quote">Next Quote</string>
+    <string name="action_sync_widgets">Sync Widgets</string>
+    <string name="action_browse_quotes">Browse Quotes</string>
+    <string name="action_reset_defaults">Reset Defaults</string>
+
+    <string name="preview_title">Live Preview</string>
+    <string name="preview_bg_stripes">Stripes</string>
+    <string name="preview_bg_dark">Dark</string>
+    <string name="preview_bg_light">Light</string>
+    <string name="preview_bg_teal">Teal</string>
+    <string name="preview_hidden_hint">(crDroid probability hide triggered for this roll)</string>
+
+    <string name="widget_count_active">%1$d widget(s) placed on home screen</string>
+    <string name="widget_count_none">No widget placed yet — tap Add to Home or add from launcher</string>
+    <string name="pin_not_supported">Your launcher does not support one-tap pinning. Long-press your home screen -> Widgets -> QuickSpace to add it.</string>
+    <string name="pin_requested">Widget add request sent to your launcher</string>
+    <string name="widgets_synced">Home screen widgets updated</string>
+    <string name="no_calendar_found">No calendar app found on device</string>
+
+    <string name="section_language">Language</string>
+    <string name="lang_system">System</string>
+    <string name="lang_zh">简体中文</string>
+    <string name="lang_en">English</string>
+    <string name="lang_desc">Applies immediately to both this app and your home screen widgets</string>
+
+    <string name="section_style_render">Appearance &amp; Rendering</string>
+    <string name="label_widget_style">Layout Style</string>
+    <string name="style_double_line">Minimal Double-Line</string>
+    <string name="style_extended">Extended Greeting</string>
+
+    <string name="label_render_mode">Render Engine</string>
+    <string name="render_native">Native TextView</string>
+    <string name="render_canvas">Canvas Double Shadow</string>
+    <string name="render_mode_hint_native">Native TextView uses system fonts and crisp vector rendering, ideal for low battery usage.</string>
+    <string name="render_mode_hint_canvas">Canvas Double Shadow reproduces crDroid\'s two-pass ambient + key shadow shader 1:1 into a widget bitmap.</string>
+
+    <string name="label_alignment">Alignment</string>
+    <string name="align_start">Left</string>
+    <string name="align_center">Center</string>
+    <string name="align_end">Right</string>
+
+    <string name="label_text_color">Text Color</string>
+    <string name="color_white">White</string>
+    <string name="color_dark">Dark</string>
+    <string name="color_auto">Auto (Day/Night)</string>
+
+    <string name="label_accent_color">Greeting Accent (Extended)</string>
+    <string name="accent_dynamic">Material You</string>
+    <string name="accent_sky">crDroid Sky</string>
+    <string name="accent_match">Match Text</string>
+
+    <string name="label_title_size">Date Size: %1$dsp</string>
+    <string name="label_subtitle_size">Quote Size: %1$dsp</string>
+    <string name="label_shadow_strength">Shadow Strength: %1$d%%</string>
+    <string name="native_shadow_hint" formatted="false">Native TextView supports shadow ON/OFF; switch to Canvas mode for 0–200% shadow intensity</string>
+    <string name="label_horizontal_padding">Horizontal Padding: %1$ddp</string>
+    <string name="label_line_spacing">Line Spacing: %1$ddp</string>
+
+    <string name="section_content">Content &amp; Behavior</string>
+    <string name="label_show_quotes">Show Random Quotes</string>
+    <string name="desc_show_quotes">Display crDroid time-based quotes below the date</string>
+    <string name="label_crdroid_prob">crDroid Original Probability Hide</string>
+    <string name="desc_crdroid_prob" formatted="false">Match upstream ~50% hide chance and empty hours (4, 10–11, 22–23); keep off to always show a quote</string>
+    <string name="label_easter_eggs">Random Easter Eggs &amp; Icon</string>
+    <string name="desc_easter_eggs">Occasionally mix in crDroid random messages with the signature crDroid icon</string>
+
+    <string name="label_quote_click">Tap Quote Action</string>
+    <string name="click_next_quote">Next Quote</string>
+    <string name="click_open_calendar">Open Calendar</string>
+    <string name="desc_title_click">Tapping the date row always opens your Calendar app</string>
+
+    <string name="section_refresh">Refresh &amp; Compatibility</string>
+    <string name="refresh_info_body">• Auto-updates every 30 minutes via system AppWidget schedule and an inexact AlarmManager midnight/30m timer.\n• Refreshes on system time, timezone, locale, and reboot broadcasts, plus screen unlock checks while cached.\n• Zero persistent foreground service or notification for minimal battery usage.</string>
+
+    <string name="reset_dialog_title">Reset to Defaults?</string>
+    <string name="reset_dialog_message">This will restore layout, colors, sizes, quote behavior, and language to their default values.</string>
+    <string name="action_confirm">Reset</string>
+    <string name="action_cancel">Cancel</string>
+
+    <string name="quotes_sheet_title">Built-in crDroid Quotes (%1$d)</string>
+    <string name="quotes_cat_morning">Morning (5–9)</string>
+    <string name="quotes_cat_noon">Noon (12–15)</string>
+    <string name="quotes_cat_early_evening">Early Evening (16–18)</string>
+    <string name="quotes_cat_evening">Evening (19–21)</string>
+    <string name="quotes_cat_midnight">Midnight (0–3)</string>
+    <string name="quotes_cat_random">Random Easter Eggs</string>
+    <string name="quote_applied_toast">Quote applied to widget</string>
+</resources>
