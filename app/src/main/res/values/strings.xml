@@ -181,12 +181,13 @@
     <string name="action_browse_quotes">Browse Quotes</string>
     <string name="action_reset_defaults">Reset Defaults</string>
 
-    <string name="preview_title">Live Preview</string>
-    <string name="preview_bg_stripes">Stripes</string>
-    <string name="preview_bg_dark">Dark</string>
-    <string name="preview_bg_light">Light</string>
-    <string name="preview_bg_teal">Teal</string>
+    <string name="preview_title">Transparent Preview</string>
     <string name="preview_hidden_hint">(crDroid probability hide triggered for this roll)</string>
+
+    <string name="coloros_widget_dialog_title">ColorOS Home Widget</string>
+    <string name="coloros_widget_dialog_body">Open the system Widgets panel and look for \"%1$s\" to place it transparently on your home screen. If opening fails, it falls back to the standard system request.</string>
+    <string name="coloros_widget_open_panel">Open Widgets Panel</string>
+    <string name="coloros_widget_fallback_system">Standard Pin Request</string>
 
     <string name="widget_count_active">%1$d widget(s) placed on home screen</string>
     <string name="widget_count_none">No widget placed yet — tap Add to Home or add from launcher</string>
@@ -232,6 +233,10 @@
     <string name="label_shadow_strength">Shadow Strength: %1$d%%</string>
     <string name="native_shadow_hint" formatted="false">Native TextView supports shadow ON/OFF; switch to Canvas mode for 0–200% shadow intensity</string>
     <string name="label_horizontal_padding">Horizontal Padding: %1$ddp</string>
+    <string name="label_vertical_offset">Vertical Offset: %1$s</string>
+    <string name="offset_center">Centered (0dp)</string>
+    <string name="offset_up">Up %1$ddp</string>
+    <string name="offset_down">Down %1$ddp</string>
     <string name="label_line_spacing">Line Spacing: %1$ddp</string>
 
     <string name="section_content">Content &amp; Behavior</string>

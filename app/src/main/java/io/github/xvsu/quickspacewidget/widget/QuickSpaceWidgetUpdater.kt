@@ -21,6 +21,9 @@ import io.github.xvsu.quickspacewidget.model.ResolvedWidgetContent
 import io.github.xvsu.quickspacewidget.model.TextAlignment
 import io.github.xvsu.quickspacewidget.model.WidgetStyle
 import io.github.xvsu.quickspacewidget.util.LocaleHelper
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 object QuickSpaceWidgetUpdater {
@@ -91,6 +94,7 @@ object QuickSpaceWidgetUpdater {
             allIds
         }
 
+        val isColorOs = ColorOsWidgetEntry.isColorOsLauncher(appContext)
         val content = QuickSpaceContentEngine.resolveContent(
             baseContext = appContext,
             settings = settings,
@@ -106,6 +110,7 @@ object QuickSpaceWidgetUpdater {
                 content = content,
                 colors = colors,
                 options = options,
+                isColorOs = isColorOs,
             )
             manager.updateAppWidget(widgetId, remoteViews)
         }
@@ -123,6 +128,7 @@ object QuickSpaceWidgetUpdater {
         content: ResolvedWidgetContent,
         colors: ResolvedWidgetColors,
         options: Bundle,
+        isColorOs: Boolean,
     ): RemoteViews {
         val calendarPendingIntent = CalendarIntentHelper.buildCalendarPendingIntent(
             context = context,
@@ -133,16 +139,36 @@ object QuickSpaceWidgetUpdater {
             QuoteClickAction.OPEN_CALENDAR -> calendarPendingIntent
         }
 
+        val (widthDp, heightDp) = resolveWidgetSizeDp(context, options)
+        val contentScale = resolveColorOsScaleCompensation(context, isColorOs, heightDp)
+        val metrics = context.resources.displayMetrics
+        val maxHeightPx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, heightDp.toFloat(), metrics
+        ).roundToInt()
+
         if (settings.renderMode == RenderMode.CANVAS_DOUBLE_SHADOW) {
-            val (widthPx, heightPx) = resolveWidgetSizePx(context, options)
+            val widthPx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP, widthDp.toFloat(), metrics
+            ).roundToInt()
             val bitmap = DoubleShadowBitmapRenderer.render(
                 context = context,
                 settings = settings,
                 content = content,
                 colors = colors,
                 targetWidthPx = widthPx,
-                targetHeightPx = heightPx,
+                maxHeightPx = maxHeightPx,
+                contentScale = contentScale,
             )
+            val slackPx = max(0, maxHeightPx - bitmap.height)
+            val requestedPadPx = TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                abs(settings.verticalOffsetDp) * contentScale * 2f,
+                metrics,
+            ).roundToInt()
+            val padPx = min(requestedPadPx, slackPx)
+            val padTopPx = if (settings.verticalOffsetDp > 0) padPx else 0
+            val padBottomPx = if (settings.verticalOffsetDp < 0) padPx else 0
+
             val hasQuote = !content.quoteText.isNullOrBlank()
             val layoutRes = when {
                 !hasQuote -> R.layout.widget_quickspace_canvas_no_quote
@@ -150,6 +176,7 @@ object QuickSpaceWidgetUpdater {
                 else -> R.layout.widget_quickspace_canvas_double
             }
             return RemoteViews(context.packageName, layoutRes).apply {
+                setViewPadding(R.id.canvas_root, 0, padTopPx, 0, padBottomPx)
                 setImageViewBitmap(R.id.canvas_widget_image, bitmap)
                 setOnClickPendingIntent(R.id.canvas_click_title, calendarPendingIntent)
                 if (hasQuote) {
@@ -165,6 +192,8 @@ object QuickSpaceWidgetUpdater {
             colors = colors,
             calendarPendingIntent = calendarPendingIntent,
             subtitlePendingIntent = subtitlePendingIntent,
+            contentScale = contentScale,
+            maxHeightPx = maxHeightPx,
         )
     }
 
@@ -175,26 +204,52 @@ object QuickSpaceWidgetUpdater {
         colors: ResolvedWidgetColors,
         calendarPendingIntent: PendingIntent,
         subtitlePendingIntent: PendingIntent,
+        contentScale: Float,
+        maxHeightPx: Int,
     ): RemoteViews {
         val layoutId = selectNativeLayout(settings.style, settings.alignment)
         val views = RemoteViews(context.packageName, layoutId)
         val metrics = context.resources.displayMetrics
         val hPadPx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, settings.horizontalPaddingDp.toFloat(), metrics
+            TypedValue.COMPLEX_UNIT_DIP, settings.horizontalPaddingDp * contentScale, metrics
         ).roundToInt()
-        val vPadPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 6f, metrics).roundToInt()
+        val vPadPx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, 6f * contentScale, metrics
+        ).roundToInt()
         val spacingPx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, settings.lineSpacingDp.toFloat(), metrics
+            TypedValue.COMPLEX_UNIT_DIP, settings.lineSpacingDp * contentScale, metrics
         ).roundToInt()
 
-        views.setViewPadding(R.id.native_root, hPadPx, vPadPx, hPadPx, vPadPx)
+        val titlePx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_SP, settings.titleSizeSp * contentScale, metrics
+        )
+        val subPx = if (!content.quoteText.isNullOrBlank()) {
+            TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP, settings.subtitleSizeSp * contentScale, metrics
+            ) * 1.5f + spacingPx
+        } else {
+            0f
+        }
+        val extraRowPx = if (settings.style == WidgetStyle.EXTENDED) titlePx * 1.3f else 0f
+        val estHeightPx = (titlePx * 1.4f + extraRowPx + subPx + vPadPx * 2).roundToInt()
+        val slackPx = max(0, maxHeightPx - estHeightPx)
+        val requestedPadPx = TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            abs(settings.verticalOffsetDp) * contentScale * 2f,
+            metrics,
+        ).roundToInt()
+        val offsetPadPx = min(requestedPadPx, slackPx)
+        val topPadPx = vPadPx + if (settings.verticalOffsetDp > 0) offsetPadPx else 0
+        val bottomPadPx = vPadPx + if (settings.verticalOffsetDp < 0) offsetPadPx else 0
+
+        views.setViewPadding(R.id.native_root, hPadPx, topPadPx, hPadPx, bottomPadPx)
         views.setViewPadding(R.id.native_subtitle_row, 0, spacingPx, 0, 0)
 
         val useShadow = colors.isLightText && settings.shadowStrengthPercent > 0
 
         if (settings.style == WidgetStyle.EXTENDED) {
-            val greetSize = (settings.titleSizeSp - 2).coerceAtLeast(13).toFloat()
-            val dateLineSize = (settings.titleSizeSp - 4).coerceAtLeast(12).toFloat()
+            val greetSize = (settings.titleSizeSp - 2).coerceAtLeast(13) * contentScale
+            val dateLineSize = (settings.titleSizeSp - 4).coerceAtLeast(12) * contentScale
             bindShadowPair(
                 views = views,
                 shadowId = R.id.native_greeting_shadow,
@@ -229,7 +284,7 @@ object QuickSpaceWidgetUpdater {
                 plainId = R.id.native_title_plain,
                 text = content.dateText,
                 color = colors.textColor,
-                sizeSp = settings.titleSizeSp.toFloat(),
+                sizeSp = settings.titleSizeSp * contentScale,
                 useShadow = useShadow,
             )
         }
@@ -243,7 +298,7 @@ object QuickSpaceWidgetUpdater {
                 plainId = R.id.native_subtitle_plain,
                 text = quote,
                 color = colors.textColor,
-                sizeSp = settings.subtitleSizeSp.toFloat(),
+                sizeSp = settings.subtitleSizeSp * contentScale,
                 useShadow = useShadow,
             )
             if (content.showEasterIcon) {
@@ -293,8 +348,7 @@ object QuickSpaceWidgetUpdater {
             }
         }
 
-    private fun resolveWidgetSizePx(context: Context, options: Bundle): Pair<Int, Int> {
-        val metrics = context.resources.displayMetrics
+    private fun resolveWidgetSizeDp(context: Context, options: Bundle): Pair<Int, Int> {
         val minW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
         val maxW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, 0)
         val minH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
@@ -328,11 +382,35 @@ object QuickSpaceWidgetUpdater {
                 minH > 0 -> minH
                 else -> 108
             }
-        }.coerceIn(56, 300)
+        }.coerceIn(56, 360)
 
-        val wPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, widthDp.toFloat(), metrics).roundToInt()
-        val hPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, heightDp.toFloat(), metrics).roundToInt()
-        return wPx to hPx
+        return widthDp to heightDp
+    }
+
+    /**
+     * ColorOS Launcher scales down multi-row third-party widgets (`3x2`, `4x2`, `3x3`) from an
+     * inflated virtual canvas back into the grid cell. Compensate so on-screen font sp stays crisp.
+     */
+    private fun resolveColorOsScaleCompensation(
+        context: Context,
+        isColorOs: Boolean,
+        virtualHeightDp: Int,
+    ): Float {
+        if (!isColorOs) return 1f
+        val cfg = context.resources.configuration
+        if (cfg.orientation == Configuration.ORIENTATION_LANDSCAPE) return 1f
+        val screenH = cfg.screenHeightDp.takeIf { it > 0 } ?: return 1f
+        return when (virtualHeightDp) {
+            in 138..186 -> {
+                val realTwoRowDp = (screenH * 0.160f).coerceIn(115f, 145f)
+                (virtualHeightDp / realTwoRowDp).coerceIn(1f, 1.55f)
+            }
+            in 230..360 -> {
+                val realThreeRowDp = (screenH * 0.244f).coerceIn(175f, 220f)
+                (virtualHeightDp / realThreeRowDp).coerceIn(1f, 1.65f)
+            }
+            else -> 1f
+        }
     }
 
     private fun nextQuotePendingIntent(context: Context): PendingIntent {

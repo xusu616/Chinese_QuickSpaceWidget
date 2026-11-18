@@ -39,129 +39,153 @@ object DoubleShadowBitmapRenderer {
         content: ResolvedWidgetContent,
         colors: ResolvedWidgetColors,
         targetWidthPx: Int,
-        targetHeightPx: Int,
+        maxHeightPx: Int,
+        contentScale: Float = 1f,
     ): Bitmap {
         val metrics = context.resources.displayMetrics
         val rawW = max(targetWidthPx, 120)
-        val rawH = max(targetHeightPx, 60)
+        val rawMaxH = max(maxHeightPx, 60)
 
-        val totalPixels = rawW.toFloat() * rawH.toFloat()
-        val scale = if (totalPixels > MAX_BITMAP_PIXELS) {
-            sqrt(MAX_BITMAP_PIXELS / totalPixels)
-        } else {
-            1f
-        }
-
-        val width = max((rawW * scale).roundToInt(), 100)
-        val height = max((rawH * scale).roundToInt(), 48)
-        val dp = metrics.density * scale
-
-        fun spToPx(sp: Float): Float =
+        fun spToPx(sp: Float, scale: Float): Float =
             TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, metrics) * scale
 
-        val shadowFactor = if (colors.isLightText) settings.shadowStrengthPercent / 100f else 0f
-        val shadowBleed = 4f * dp * shadowFactor
-        val hPad = max(settings.horizontalPaddingDp * dp, ceil(shadowBleed))
-        val availableWidth = max((width - hPad * 2f).toInt(), 40)
+        fun buildWithScale(scale: Float): Triple<List<RenderRow>, Float, LayoutMetrics> {
+            val dp = metrics.density * scale
+            val cScale = contentScale.coerceIn(1f, 1.7f)
+            val width = max((rawW * scale).roundToInt(), 100)
+            val maxH = max((rawMaxH * scale).roundToInt(), 48)
+            val shadowFactor = if (colors.isLightText) settings.shadowStrengthPercent / 100f else 0f
+            val shadowBleed = 4f * dp * cScale * shadowFactor
+            val hPad = max(settings.horizontalPaddingDp * dp * cScale, ceil(shadowBleed))
+            val availableWidth = max((width - hPad * 2f).toInt(), 40)
 
-        val layoutAlign = when (settings.alignment) {
-            TextAlignment.START -> Layout.Alignment.ALIGN_NORMAL
-            TextAlignment.CENTER -> Layout.Alignment.ALIGN_CENTER
-            TextAlignment.END -> Layout.Alignment.ALIGN_OPPOSITE
-        }
-
-        val titlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-            typeface = Typeface.create("sans-serif", Typeface.NORMAL)
-            color = colors.textColor
-        }
-        val accentPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-            typeface = Typeface.create("sans-serif", Typeface.NORMAL)
-            color = colors.accentColor
-        }
-        val subtitlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-            typeface = Typeface.create("sans-serif", Typeface.NORMAL)
-            color = colors.textColor
-            letterSpacing = 0.01f
-        }
-
-        fun buildRows(fitScale: Float): Pair<List<RenderRow>, Float> {
-            val spacing = settings.lineSpacingDp * dp * fitScale
-            val rows = mutableListOf<RenderRow>()
-
-            if (settings.style == WidgetStyle.EXTENDED) {
-                val greetSize = spToPx((settings.titleSizeSp - 2).coerceAtLeast(13) * fitScale)
-                accentPaint.textSize = greetSize
-                rows += RenderRow.SingleText(
-                    layout = buildLayout(content.greeting, accentPaint, availableWidth, layoutAlign, maxLines = 1),
-                    paint = TextPaint(accentPaint),
-                )
-
-                val dateLineSize = spToPx((settings.titleSizeSp - 4).coerceAtLeast(12) * fitScale)
-                accentPaint.textSize = dateLineSize
-                titlePaint.textSize = dateLineSize
-                rows += RenderRow.PrefixAndText(
-                    prefix = content.clockPrefix,
-                    prefixPaint = TextPaint(accentPaint),
-                    mainText = content.dateText,
-                    mainPaint = TextPaint(titlePaint),
-                    gapPx = 6f * dp * fitScale,
-                    maxWidth = availableWidth,
-                )
-            } else {
-                titlePaint.textSize = spToPx(settings.titleSizeSp * fitScale)
-                rows += RenderRow.SingleText(
-                    layout = buildLayout(content.dateText, titlePaint, availableWidth, layoutAlign, maxLines = 1),
-                    paint = TextPaint(titlePaint),
-                )
+            val layoutAlign = when (settings.alignment) {
+                TextAlignment.START -> Layout.Alignment.ALIGN_NORMAL
+                TextAlignment.CENTER -> Layout.Alignment.ALIGN_CENTER
+                TextAlignment.END -> Layout.Alignment.ALIGN_OPPOSITE
             }
 
-            val quote = content.quoteText
-            if (!quote.isNullOrBlank()) {
-                subtitlePaint.textSize = spToPx(settings.subtitleSizeSp * fitScale)
-                val rawIconSize = if (content.showEasterIcon) (20f * dp * fitScale).roundToInt() else 0
-                val rawIconGap = if (content.showEasterIcon) (6f * dp * fitScale) else 0f
-                val canFitIcon = rawIconSize > 0 && availableWidth > rawIconSize + rawIconGap + 24f
-                val iconSizePx = if (canFitIcon) rawIconSize else 0
-                val iconGapPx = if (canFitIcon) rawIconGap else 0f
-                val subTextMaxW = max(availableWidth - iconSizePx - iconGapPx.roundToInt(), 24)
-                val subLayout = buildLayout(quote, subtitlePaint, subTextMaxW, layoutAlign, maxLines = 2)
-                rows += RenderRow.Subtitle(
-                    layout = subLayout,
-                    paint = TextPaint(subtitlePaint),
-                    iconSizePx = iconSizePx,
-                    iconGapPx = iconGapPx,
-                )
+            val titlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+                typeface = Typeface.create("sans-serif", Typeface.NORMAL)
+                color = colors.textColor
+            }
+            val accentPaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+                typeface = Typeface.create("sans-serif", Typeface.NORMAL)
+                color = colors.accentColor
+            }
+            val subtitlePaint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+                typeface = Typeface.create("sans-serif", Typeface.NORMAL)
+                color = colors.textColor
+                letterSpacing = 0.01f
             }
 
-            val totalH = rows.foldIndexed(0f) { index, acc, row ->
-                acc + row.height + if (index > 0) spacing else 0f
+            fun measureRows(fitScale: Float): Pair<List<RenderRow>, Float> {
+                val effective = fitScale * cScale
+                val spacing = settings.lineSpacingDp * dp * effective
+                val rows = mutableListOf<RenderRow>()
+
+                if (settings.style == WidgetStyle.EXTENDED) {
+                    val greetSize = spToPx((settings.titleSizeSp - 2).coerceAtLeast(13) * effective, scale)
+                    accentPaint.textSize = greetSize
+                    rows += RenderRow.SingleText(
+                        layout = buildLayout(content.greeting, accentPaint, availableWidth, layoutAlign, maxLines = 1),
+                        paint = TextPaint(accentPaint),
+                    )
+
+                    val dateLineSize = spToPx((settings.titleSizeSp - 4).coerceAtLeast(12) * effective, scale)
+                    accentPaint.textSize = dateLineSize
+                    titlePaint.textSize = dateLineSize
+                    rows += RenderRow.PrefixAndText(
+                        prefix = content.clockPrefix,
+                        prefixPaint = TextPaint(accentPaint),
+                        mainText = content.dateText,
+                        mainPaint = TextPaint(titlePaint),
+                        gapPx = 6f * dp * effective,
+                        maxWidth = availableWidth,
+                    )
+                } else {
+                    titlePaint.textSize = spToPx(settings.titleSizeSp * effective, scale)
+                    rows += RenderRow.SingleText(
+                        layout = buildLayout(content.dateText, titlePaint, availableWidth, layoutAlign, maxLines = 1),
+                        paint = TextPaint(titlePaint),
+                    )
+                }
+
+                val quote = content.quoteText
+                if (!quote.isNullOrBlank()) {
+                    subtitlePaint.textSize = spToPx(settings.subtitleSizeSp * effective, scale)
+                    val rawIconSize = if (content.showEasterIcon) (20f * dp * effective).roundToInt() else 0
+                    val rawIconGap = if (content.showEasterIcon) (6f * dp * effective) else 0f
+                    val canFitIcon = rawIconSize > 0 && availableWidth > rawIconSize + rawIconGap + 24f
+                    val iconSizePx = if (canFitIcon) rawIconSize else 0
+                    val iconGapPx = if (canFitIcon) rawIconGap else 0f
+                    val subTextMaxW = max(availableWidth - iconSizePx - iconGapPx.roundToInt(), 24)
+                    val subLayout = buildLayout(quote, subtitlePaint, subTextMaxW, layoutAlign, maxLines = 2)
+                    rows += RenderRow.Subtitle(
+                        layout = subLayout,
+                        paint = TextPaint(subtitlePaint),
+                        iconSizePx = iconSizePx,
+                        iconGapPx = iconGapPx,
+                    )
+                }
+
+                val totalH = rows.foldIndexed(0f) { index, acc, row ->
+                    acc + row.height + if (index > 0) spacing else 0f
+                }
+                return rows to totalH
             }
-            return rows to totalH
+
+            val usableHeight = max(24f, maxH - 2f * shadowBleed)
+            var (rows, totalContentHeight) = measureRows(fitScale = 1f)
+            var spacing = settings.lineSpacingDp * dp * cScale
+            if (totalContentHeight > usableHeight && totalContentHeight > 0f) {
+                val fitScale = (usableHeight / totalContentHeight).coerceIn(0.55f, 1f)
+                spacing *= fitScale
+                val rebuilt = measureRows(fitScale)
+                rows = rebuilt.first
+                totalContentHeight = rebuilt.second
+            }
+
+            // Size bitmap tightly to the content height so tall widgets never trigger ImageView fitCenter shrinking
+            val tightHeight = max(ceil(totalContentHeight + shadowBleed * 2f).toInt(), 48)
+            return Triple(
+                rows,
+                spacing,
+                LayoutMetrics(
+                    width = width,
+                    height = tightHeight,
+                    dp = dp * cScale,
+                    hPad = hPad,
+                    availableWidth = availableWidth,
+                    shadowFactor = shadowFactor,
+                    shadowBleed = shadowBleed,
+                    totalContentHeight = totalContentHeight,
+                ),
+            )
         }
 
-        val usableHeight = max(24f, height - 2f * shadowBleed)
-        var (rows, totalContentHeight) = buildRows(fitScale = 1f)
-        var spacing = settings.lineSpacingDp * dp
-        if (totalContentHeight > usableHeight && totalContentHeight > 0f) {
-            val fitScale = (usableHeight / totalContentHeight).coerceIn(0.55f, 1f)
-            spacing *= fitScale
-            val rebuilt = buildRows(fitScale)
+        var (rows, spacing, lm) = buildWithScale(scale = 1f)
+        val tightPixels = lm.width.toFloat() * lm.height.toFloat()
+        if (tightPixels > MAX_BITMAP_PIXELS) {
+            val downscale = sqrt(MAX_BITMAP_PIXELS / tightPixels)
+            val rebuilt = buildWithScale(downscale)
             rows = rebuilt.first
-            totalContentHeight = rebuilt.second
+            spacing = rebuilt.second
+            lm = rebuilt.third
         }
 
-        val bitmap = createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(lm.width, lm.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        var currentY = max(shadowBleed, (height - totalContentHeight) / 2f)
+        var currentY = max(lm.shadowBleed, (lm.height - lm.totalContentHeight) / 2f)
 
         rows.forEachIndexed { index, row ->
             if (index > 0) currentY += spacing
             when (row) {
                 is RenderRow.SingleText -> {
                     canvas.withSave {
-                        translate(hPad, currentY)
-                        drawDoubleShadowLayout(this, row.layout, row.paint, dp, shadowFactor)
+                        translate(lm.hPad, currentY)
+                        drawDoubleShadowLayout(this, row.layout, row.paint, lm.dp, lm.shadowFactor)
                     }
                 }
                 is RenderRow.PrefixAndText -> {
@@ -169,14 +193,14 @@ object DoubleShadowBitmapRenderer {
                     val mainW = row.mainPaint.measureText(row.mainText)
                     val combinedW = min(prefixW + row.gapPx + mainW, row.maxWidth.toFloat())
                     val startX = when (settings.alignment) {
-                        TextAlignment.START -> hPad
-                        TextAlignment.CENTER -> hPad + (row.maxWidth - combinedW) / 2f
-                        TextAlignment.END -> hPad + (row.maxWidth - combinedW)
+                        TextAlignment.START -> lm.hPad
+                        TextAlignment.CENTER -> lm.hPad + (row.maxWidth - combinedW) / 2f
+                        TextAlignment.END -> lm.hPad + (row.maxWidth - combinedW)
                     }
                     val fm = row.mainPaint.fontMetrics
                     val baselineY = currentY - fm.ascent
                     drawDoubleShadowText(
-                        canvas, row.prefix, startX, baselineY, row.prefixPaint, dp, shadowFactor
+                        canvas, row.prefix, startX, baselineY, row.prefixPaint, lm.dp, lm.shadowFactor
                     )
                     val remainingMainW = max(row.maxWidth - prefixW - row.gapPx, 20f)
                     val clippedMain = TextUtils.ellipsize(
@@ -188,8 +212,8 @@ object DoubleShadowBitmapRenderer {
                         startX + prefixW + row.gapPx,
                         baselineY,
                         row.mainPaint,
-                        dp,
-                        shadowFactor,
+                        lm.dp,
+                        lm.shadowFactor,
                     )
                 }
                 is RenderRow.Subtitle -> {
@@ -200,9 +224,9 @@ object DoubleShadowBitmapRenderer {
                     }
                     val totalRowW = row.iconSizePx + row.iconGapPx + maxLineW
                     val rowStartX = when (settings.alignment) {
-                        TextAlignment.START -> hPad
-                        TextAlignment.CENTER -> hPad + max(0f, (availableWidth - totalRowW) / 2f)
-                        TextAlignment.END -> hPad + max(0f, availableWidth - totalRowW)
+                        TextAlignment.START -> lm.hPad
+                        TextAlignment.CENTER -> lm.hPad + max(0f, (lm.availableWidth - totalRowW) / 2f)
+                        TextAlignment.END -> lm.hPad + max(0f, lm.availableWidth - totalRowW)
                     }
                     if (row.iconSizePx > 0) {
                         val iconDrawable = ContextCompat.getDrawable(context, R.drawable.ic_quickspace_crdroid)?.mutate()
@@ -214,10 +238,10 @@ object DoubleShadowBitmapRenderer {
                             iconDrawable.draw(canvas)
                         }
                     }
-                    val textOffsetX = hPad + row.iconSizePx + row.iconGapPx
+                    val textOffsetX = lm.hPad + row.iconSizePx + row.iconGapPx
                     canvas.withSave {
                         translate(textOffsetX, currentY)
-                        drawDoubleShadowLayout(this, row.layout, row.paint, dp, shadowFactor)
+                        drawDoubleShadowLayout(this, row.layout, row.paint, lm.dp, lm.shadowFactor)
                     }
                 }
             }
@@ -305,6 +329,17 @@ object DoubleShadowBitmapRenderer {
         val alpha = (baseAlpha * shadowFactor * (textAlpha / 255f)).roundToInt().coerceIn(0, 255)
         return Color.argb(alpha, 0, 0, 0)
     }
+
+    private data class LayoutMetrics(
+        val width: Int,
+        val height: Int,
+        val dp: Float,
+        val hPad: Float,
+        val availableWidth: Int,
+        val shadowFactor: Float,
+        val shadowBleed: Float,
+        val totalContentHeight: Float,
+    )
 
     private sealed class RenderRow {
         abstract val height: Float

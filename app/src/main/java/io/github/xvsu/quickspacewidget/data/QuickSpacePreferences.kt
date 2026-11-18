@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import io.github.xvsu.quickspacewidget.model.AccentColorMode
 import io.github.xvsu.quickspacewidget.model.AppLanguage
-import io.github.xvsu.quickspacewidget.model.PreviewWallpaper
 import io.github.xvsu.quickspacewidget.model.QuickSpaceSettings
 import io.github.xvsu.quickspacewidget.model.QuoteCategory
 import io.github.xvsu.quickspacewidget.model.QuoteClickAction
@@ -31,12 +30,12 @@ class QuickSpacePreferences(context: Context) {
         subtitleSizeSp = prefs.getInt(KEY_SUBTITLE_SIZE, 16).coerceIn(12, 22),
         shadowStrengthPercent = prefs.getInt(KEY_SHADOW_STRENGTH, 100).coerceIn(0, 200),
         horizontalPaddingDp = prefs.getInt(KEY_HORIZONTAL_PADDING, 16).coerceIn(0, 32),
+        verticalOffsetDp = prefs.getInt(KEY_VERTICAL_OFFSET, 0).coerceIn(-32, 32),
         lineSpacingDp = prefs.getInt(KEY_LINE_SPACING, 6).coerceIn(2, 14),
         showQuotes = prefs.getBoolean(KEY_SHOW_QUOTES, true),
         crDroidProbabilityHide = prefs.getBoolean(KEY_CRDROID_PROB_HIDE, false),
         enableEasterEggs = prefs.getBoolean(KEY_ENABLE_EASTER_EGGS, true),
         quoteClickAction = QuoteClickAction.fromKey(prefs.getString(KEY_QUOTE_CLICK_ACTION, null)),
-        previewWallpaper = PreviewWallpaper.fromKey(prefs.getString(KEY_PREVIEW_WALLPAPER, null)),
     )
 
     fun saveSettings(settings: QuickSpaceSettings) {
@@ -51,12 +50,12 @@ class QuickSpacePreferences(context: Context) {
             putInt(KEY_SUBTITLE_SIZE, settings.subtitleSizeSp)
             putInt(KEY_SHADOW_STRENGTH, settings.shadowStrengthPercent)
             putInt(KEY_HORIZONTAL_PADDING, settings.horizontalPaddingDp)
+            putInt(KEY_VERTICAL_OFFSET, settings.verticalOffsetDp)
             putInt(KEY_LINE_SPACING, settings.lineSpacingDp)
             putBoolean(KEY_SHOW_QUOTES, settings.showQuotes)
             putBoolean(KEY_CRDROID_PROB_HIDE, settings.crDroidProbabilityHide)
             putBoolean(KEY_ENABLE_EASTER_EGGS, settings.enableEasterEggs)
             putString(KEY_QUOTE_CLICK_ACTION, settings.quoteClickAction.key)
-            putString(KEY_PREVIEW_WALLPAPER, settings.previewWallpaper.key)
         }
     }
 
@@ -100,12 +99,12 @@ class QuickSpacePreferences(context: Context) {
         private const val KEY_SUBTITLE_SIZE = "subtitle_size_sp"
         private const val KEY_SHADOW_STRENGTH = "shadow_strength_percent"
         private const val KEY_HORIZONTAL_PADDING = "horizontal_padding_dp"
+        private const val KEY_VERTICAL_OFFSET = "vertical_offset_dp"
         private const val KEY_LINE_SPACING = "line_spacing_dp"
         private const val KEY_SHOW_QUOTES = "show_quotes"
         private const val KEY_CRDROID_PROB_HIDE = "crdroid_prob_hide"
         private const val KEY_ENABLE_EASTER_EGGS = "enable_easter_eggs"
         private const val KEY_QUOTE_CLICK_ACTION = "quote_click_action"
-        private const val KEY_PREVIEW_WALLPAPER = "preview_wallpaper"
 
         private const val KEY_STATE_CATEGORY = "state_category"
         private const val KEY_STATE_INDEX = "state_index"

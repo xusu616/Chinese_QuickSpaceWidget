@@ -2,6 +2,7 @@ package io.github.xvsu.quickspacewidget
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -24,6 +25,7 @@ import io.github.xvsu.quickspacewidget.model.QuoteSelectionState
 import io.github.xvsu.quickspacewidget.ui.MainScreen
 import io.github.xvsu.quickspacewidget.ui.theme.QuickSpaceTheme
 import io.github.xvsu.quickspacewidget.util.LocaleHelper
+import io.github.xvsu.quickspacewidget.widget.ColorOsWidgetEntry
 import io.github.xvsu.quickspacewidget.widget.QuickSpaceActionReceiver
 import io.github.xvsu.quickspacewidget.widget.QuickSpaceWidgetProvider
 import io.github.xvsu.quickspacewidget.widget.QuickSpaceWidgetUpdater
@@ -64,6 +66,9 @@ class MainActivity : ComponentActivity() {
             }
             val snackbarHostState = remember { SnackbarHostState() }
             val scope = rememberCoroutineScope()
+            val colorOsEntryIntent = remember(this@MainActivity) {
+                ColorOsWidgetEntry.intent(this@MainActivity)
+            }
 
             QuickSpaceTheme {
                 MainScreen(
@@ -71,6 +76,7 @@ class MainActivity : ComponentActivity() {
                     settings = settingsState,
                     content = resolvedContent,
                     placedWidgetCount = placedCountState,
+                    hasColorOsWidgetEntry = colorOsEntryIntent != null,
                     snackbarHostState = snackbarHostState,
                     onUpdatePreviewSettings = { preview ->
                         settingsState = preview
@@ -131,7 +137,31 @@ class MainActivity : ComponentActivity() {
                             snackbarHostState.showSnackbar(localizedCtx.getString(R.string.quote_applied_toast))
                         }
                     },
-                    onAddWidget = {
+                    onOpenColorOsWidgetPanel = {
+                        val intent = ColorOsWidgetEntry.intent(this@MainActivity)
+                        if (intent != null) {
+                            val opened = try {
+                                startActivity(intent)
+                                true
+                            } catch (_: ActivityNotFoundException) {
+                                false
+                            } catch (_: SecurityException) {
+                                false
+                            } catch (_: RuntimeException) {
+                                false
+                            }
+                            if (!opened) {
+                                requestPinWidget(localizedCtx) { msg ->
+                                    scope.launch { snackbarHostState.showSnackbar(msg) }
+                                }
+                            }
+                        } else {
+                            requestPinWidget(localizedCtx) { msg ->
+                                scope.launch { snackbarHostState.showSnackbar(msg) }
+                            }
+                        }
+                    },
+                    onRequestStandardPinWidget = {
                         requestPinWidget(localizedCtx) { msg ->
                             scope.launch { snackbarHostState.showSnackbar(msg) }
                         }
@@ -246,7 +276,16 @@ class MainActivity : ComponentActivity() {
                 callbackIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
-            val accepted = manager.requestPinAppWidget(provider, null, successCallback)
+            val accepted = try {
+                manager.requestPinAppWidget(provider, null, successCallback)
+            } catch (_: SecurityException) {
+                false
+            } catch (_: ActivityNotFoundException) {
+                false
+            }
+            if (!accepted) {
+                successCallback.cancel()
+            }
             onMessage(
                 localizedCtx.getString(
                     if (accepted) R.string.pin_requested else R.string.pin_not_supported

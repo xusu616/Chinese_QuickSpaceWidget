@@ -178,12 +178,13 @@
     <string name="action_browse_quotes">浏览全部语录</string>
     <string name="action_reset_defaults">恢复默认</string>
 
-    <string name="preview_title">实时效果预览</string>
-    <string name="preview_bg_stripes">彩条壁纸</string>
-    <string name="preview_bg_dark">深色背景</string>
-    <string name="preview_bg_light">浅色壁纸</string>
-    <string name="preview_bg_teal">青蓝渐变</string>
+    <string name="preview_title">透明效果预览</string>
     <string name="preview_hidden_hint">（本次随机触发了 crDroid 原版概率隐藏）</string>
+
+    <string name="coloros_widget_dialog_title">ColorOS 桌面组件</string>
+    <string name="coloros_widget_dialog_body">将打开系统「插件」面板，在其中找到「%1$s」即可添加到桌面；若打开失败会自动回退到系统标准添加请求。</string>
+    <string name="coloros_widget_open_panel">打开桌面组件</string>
+    <string name="coloros_widget_fallback_system">系统标准添加</string>
 
     <string name="widget_count_active">桌面已添加 %1$d 个小组件，修改设置会即时同步</string>
     <string name="widget_count_none">暂未检测到已添加的小组件，可点击“添加到桌面”或在桌面添加</string>
@@ -229,6 +230,10 @@
     <string name="label_shadow_strength">阴影强度：%1$d%%</string>
     <string name="native_shadow_hint">原生 TextView 模式仅支持开启/关闭阴影；1:1 阴影强度连续调节请使用 Canvas 模式</string>
     <string name="label_horizontal_padding">水平留白：%1$ddp</string>
+    <string name="label_vertical_offset">整体上下偏移：%1$s</string>
+    <string name="offset_center">居中 (0dp)</string>
+    <string name="offset_up">上移 %1$ddp</string>
+    <string name="offset_down">下移 %1$ddp</string>
     <string name="label_line_spacing">行间距：%1$ddp</string>
 
     <string name="section_content">内容与语录行为</string>

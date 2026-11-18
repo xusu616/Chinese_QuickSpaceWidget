@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -89,7 +90,6 @@ import io.github.xvsu.quickspacewidget.R
 import io.github.xvsu.quickspacewidget.engine.QuickSpaceContentEngine
 import io.github.xvsu.quickspacewidget.model.AccentColorMode
 import io.github.xvsu.quickspacewidget.model.AppLanguage
-import io.github.xvsu.quickspacewidget.model.PreviewWallpaper
 import io.github.xvsu.quickspacewidget.model.QuickSpaceSettings
 import io.github.xvsu.quickspacewidget.model.QuoteCategory
 import io.github.xvsu.quickspacewidget.model.QuoteClickAction
@@ -101,6 +101,7 @@ import io.github.xvsu.quickspacewidget.model.WidgetStyle
 import io.github.xvsu.quickspacewidget.widget.ColorResolver
 import io.github.xvsu.quickspacewidget.widget.DoubleShadowBitmapRenderer
 import io.github.xvsu.quickspacewidget.widget.ResolvedWidgetColors
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,18 +111,21 @@ fun MainScreen(
     settings: QuickSpaceSettings,
     content: ResolvedWidgetContent,
     placedWidgetCount: Int,
+    hasColorOsWidgetEntry: Boolean,
     snackbarHostState: SnackbarHostState,
     onUpdatePreviewSettings: (QuickSpaceSettings) -> Unit,
     onCommitSettings: (QuickSpaceSettings) -> Unit,
     onNextQuote: () -> Unit,
     onSelectSpecificQuote: (QuoteCategory, Int) -> Unit,
-    onAddWidget: () -> Unit,
+    onOpenColorOsWidgetPanel: () -> Unit,
+    onRequestStandardPinWidget: () -> Unit,
     onSyncWidgets: () -> Unit,
     onResetDefaults: () -> Unit,
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showQuotesSheet by remember { mutableStateOf(false) }
     var showResetConfirm by remember { mutableStateOf(false) }
+    var showColorOsDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -172,9 +176,14 @@ fun MainScreen(
                 settings = settings,
                 content = content,
                 placedWidgetCount = placedWidgetCount,
-                onSelectWallpaper = { onCommitSettings(settings.copy(previewWallpaper = it)) },
                 onNextQuote = onNextQuote,
-                onAddWidget = onAddWidget,
+                onAddWidget = {
+                    if (hasColorOsWidgetEntry) {
+                        showColorOsDialog = true
+                    } else {
+                        onRequestStandardPinWidget()
+                    }
+                },
                 onBrowseQuotes = { showQuotesSheet = true },
             )
 
@@ -204,6 +213,41 @@ fun MainScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
+    }
+
+    if (showColorOsDialog) {
+        AlertDialog(
+            onDismissRequest = { showColorOsDialog = false },
+            title = { Text(localizedContext.getString(R.string.coloros_widget_dialog_title)) },
+            text = {
+                Text(
+                    localizedContext.getString(
+                        R.string.coloros_widget_dialog_body,
+                        localizedContext.getString(R.string.app_name),
+                    )
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showColorOsDialog = false
+                        onOpenColorOsWidgetPanel()
+                    }
+                ) {
+                    Text(localizedContext.getString(R.string.coloros_widget_open_panel))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showColorOsDialog = false
+                        onRequestStandardPinWidget()
+                    }
+                ) {
+                    Text(localizedContext.getString(R.string.coloros_widget_fallback_system))
+                }
+            },
+        )
     }
 
     if (showResetConfirm) {
@@ -247,7 +291,6 @@ private fun PreviewSectionCard(
     settings: QuickSpaceSettings,
     content: ResolvedWidgetContent,
     placedWidgetCount: Int,
-    onSelectWallpaper: (PreviewWallpaper) -> Unit,
     onNextQuote: () -> Unit,
     onAddWidget: () -> Unit,
     onBrowseQuotes: () -> Unit,
@@ -271,29 +314,6 @@ private fun PreviewSectionCard(
                 style = MaterialTheme.typography.titleMedium,
             )
 
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(PreviewWallpaper.entries.size) { i ->
-                    val wp = PreviewWallpaper.entries[i]
-                    FilterChip(
-                        selected = settings.previewWallpaper == wp,
-                        onClick = { onSelectWallpaper(wp) },
-                        label = {
-                            Text(
-                                text = localizedContext.getString(
-                                    when (wp) {
-                                        PreviewWallpaper.STRIPES -> R.string.preview_bg_stripes
-                                        PreviewWallpaper.DARK -> R.string.preview_bg_dark
-                                        PreviewWallpaper.LIGHT -> R.string.preview_bg_light
-                                        PreviewWallpaper.TEAL -> R.string.preview_bg_teal
-                                    }
-                                ),
-                                style = MaterialTheme.typography.labelSmall,
-                            )
-                        },
-                    )
-                }
-            }
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -301,7 +321,7 @@ private fun PreviewSectionCard(
                     .clip(RoundedCornerShape(20.dp))
                     .clickable(onClick = onNextQuote),
             ) {
-                SimulatedWallpaper(settings.previewWallpaper)
+                StripedPreviewWallpaper()
 
                 if (settings.renderMode == RenderMode.CANVAS_DOUBLE_SHADOW) {
                     CanvasWidgetPreview(
@@ -396,95 +416,58 @@ private fun PreviewSectionCard(
 }
 
 @Composable
-private fun SimulatedWallpaper(wallpaper: PreviewWallpaper) {
-    when (wallpaper) {
-        PreviewWallpaper.STRIPES -> {
-            Row(modifier = Modifier.fillMaxSize()) {
-                Box(
-                    Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color(0xFFDDD8CF), Color(0xFFCCC6BA))
-                            )
-                        )
-                )
-                Box(
-                    Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color(0xFFBACEDB), Color(0xFFA7BECD))
-                            )
-                        )
-                )
-                Box(
-                    Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color(0xFF53C1EC), Color(0xFF39B0DE))
-                            )
-                        )
-                )
-                Box(
-                    Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color(0xFFE7E2DB), Color(0xFFDCD6CD))
-                            )
-                        )
-                )
-                Box(
-                    Modifier
-                        .weight(0.7f)
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(Color(0xFFEBA0AA), Color(0xFFDD8A95))
-                            )
-                        )
-                )
-            }
-        }
-        PreviewWallpaper.DARK -> {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.linearGradient(
-                            listOf(Color(0xFF151A24), Color(0xFF232C3D))
-                        )
+private fun StripedPreviewWallpaper() {
+    Row(modifier = Modifier.fillMaxSize()) {
+        Box(
+            Modifier
+                .weight(1f)
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFFDDD8CF), Color(0xFFCCC6BA))
                     )
-            )
-        }
-        PreviewWallpaper.LIGHT -> {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.linearGradient(
-                            listOf(Color(0xFFF3F6FA), Color(0xFFE3EAF2))
-                        )
+                )
+        )
+        Box(
+            Modifier
+                .weight(1f)
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFFBACEDB), Color(0xFFA7BECD))
                     )
-            )
-        }
-        PreviewWallpaper.TEAL -> {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.linearGradient(
-                            listOf(Color(0xFF0E4A6F), Color(0xFF1D7B9B), Color(0xFF42B5C7))
-                        )
+                )
+        )
+        Box(
+            Modifier
+                .weight(1f)
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF53C1EC), Color(0xFF39B0DE))
                     )
-            )
-        }
+                )
+        )
+        Box(
+            Modifier
+                .weight(1f)
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFFE7E2DB), Color(0xFFDCD6CD))
+                    )
+                )
+        )
+        Box(
+            Modifier
+                .weight(0.7f)
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFFEBA0AA), Color(0xFFDD8A95))
+                    )
+                )
+        )
     }
 }
 
@@ -513,14 +496,18 @@ private fun CanvasWidgetPreview(
                 content = content,
                 colors = colors,
                 targetWidthPx = widthPx,
-                targetHeightPx = heightPx,
+                maxHeightPx = heightPx,
             )
         }
+        val slackDp = ((maxHeight.value) - (bitmap.height / density.density)).coerceAtLeast(0f)
+        val clampedOffsetDp = settings.verticalOffsetDp.toFloat().coerceIn(-slackDp / 2f, slackDp / 2f)
         Image(
             bitmap = bitmap.asImageBitmap(),
             contentDescription = null,
             contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .offset(y = clampedOffsetDp.dp),
         )
     }
 }
@@ -561,7 +548,8 @@ private fun NativeStylePreview(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = settings.horizontalPaddingDp.dp, vertical = 6.dp),
+            .padding(horizontal = settings.horizontalPaddingDp.dp, vertical = 6.dp)
+            .offset(y = settings.verticalOffsetDp.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = horizontalAlign,
     ) {
@@ -874,6 +862,21 @@ private fun AppearanceCard(
             step = 2,
             onPreviewValue = { onPreviewChange(settings.copy(horizontalPaddingDp = it)) },
             onCommitValue = { onCommitSettings(settings.copy(horizontalPaddingDp = it)) },
+        )
+        val verticalOffsetValueText = when {
+            settings.verticalOffsetDp < 0 ->
+                localizedContext.getString(R.string.offset_up, abs(settings.verticalOffsetDp))
+            settings.verticalOffsetDp > 0 ->
+                localizedContext.getString(R.string.offset_down, settings.verticalOffsetDp)
+            else -> localizedContext.getString(R.string.offset_center)
+        }
+        IntSliderSetting(
+            label = localizedContext.getString(R.string.label_vertical_offset, verticalOffsetValueText),
+            value = settings.verticalOffsetDp,
+            range = -32..32,
+            step = 2,
+            onPreviewValue = { onPreviewChange(settings.copy(verticalOffsetDp = it)) },
+            onCommitValue = { onCommitSettings(settings.copy(verticalOffsetDp = it)) },
         )
         IntSliderSetting(
             label = localizedContext.getString(R.string.label_line_spacing, settings.lineSpacingDp),

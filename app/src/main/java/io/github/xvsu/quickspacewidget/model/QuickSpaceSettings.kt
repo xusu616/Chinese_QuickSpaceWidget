@@ -74,18 +74,6 @@ enum class QuoteClickAction(val key: String) {
     }
 }
 
-enum class PreviewWallpaper(val key: String) {
-    STRIPES("stripes"),
-    DARK("dark"),
-    LIGHT("light"),
-    TEAL("teal");
-
-    companion object {
-        fun fromKey(key: String?): PreviewWallpaper =
-            entries.firstOrNull { it.key == key } ?: STRIPES
-    }
-}
-
 enum class QuoteCategory(val key: String) {
     MORNING("morning"),
     NOON("noon"),
@@ -112,12 +100,12 @@ data class QuickSpaceSettings(
     val subtitleSizeSp: Int = 16,
     val shadowStrengthPercent: Int = 100,
     val horizontalPaddingDp: Int = 16,
+    val verticalOffsetDp: Int = 0,
     val lineSpacingDp: Int = 6,
     val showQuotes: Boolean = true,
     val crDroidProbabilityHide: Boolean = false,
     val enableEasterEggs: Boolean = true,
     val quoteClickAction: QuoteClickAction = QuoteClickAction.NEXT_QUOTE,
-    val previewWallpaper: PreviewWallpaper = PreviewWallpaper.STRIPES,
 )
 
 data class QuoteSelectionState(
